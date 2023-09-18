@@ -115,19 +115,73 @@ class HBNBCommand(cmd.Cmd):
         """ Overrides the emptyline method of CMD """
         pass
 
-    def do_create(self, args):
-        """ Create an object of any class"""
-        if not args:
-            print("** class name missing **")
-            return
-        elif args not in HBNBCommand.classes:
-            print("** class doesn't exist **")
-            return
-        new_instance = HBNBCommand.classes[args]()
-        storage.save()
-        print(new_instance.id)
-        storage.save()
+def do_create(self, args):
+    """
+    Create a new object of a specific class with provided parameters.
+    Usage: create <Class name> <param 1> <param 2> <param 3>...
+    Parameter format: <key name>=<value>
+    Value formats:
+        - String: "<value>" (use double quotes, escape double quotes and replace underscores with spaces)
+        - Float: <unit>.<decimal>
+        - Integer: <number>
+    """
+    # Check if class name is missing
+    if not args:
+        print("** Class name is missing. **")
+        return
 
+    # Split the arguments into class name and parameter pairs
+    args = args.split()
+    class_name = args[0]
+    param_pairs = args[1:]
+
+    # Check if the specified class exists
+    if class_name not in HBNBCommand.classes:
+        print("** Class doesn't exist. **")
+        return
+
+    # Create a dictionary to store the parameters
+    param_dict = {}
+
+    # Iterate through parameter pairs
+    for pair in param_pairs:
+        # Split the parameter pair into key and value
+        key, value = pair.split('=')
+
+        # Handle string values (remove double quotes and replace underscores)
+        if value.startswith('"') and value.endswith('"'):
+            value = value[1:-1].replace('_', ' ').replace('\\"', '"')
+
+        # Try to convert value to float or int if possible
+        try:
+            if '.' in value:
+                value = float(value)
+            else:
+                value = int(value)
+        except ValueError:
+            pass
+
+        # Add the key-value pair to the param_dict
+        param_dict[key] = value
+
+    # Create an instance of the specified class with the provided parameters
+    new_instance = HBNBCommand.classes[class_name](**param_dict)
+
+    # Save the new instance
+    new_instance.save()
+    print("Object created with ID:", new_instance.id)
+
+def test_create_with_params(self):
+    # Test creating a State object with parameters
+    self.assertFalse(self.onecmd("create State name=\"California\""))
+    self.assertIn("California", captured_output.getvalue())
+
+    self.assertFalse(self.onecmd("create State name=\"Arizona\""))
+    self.assertIn("Arizona", captured_output.getvalue())
+
+    # Test creating a Place object with parameters
+    self.assertFalse(self.onecmd("create Place city_id=\"0001\" user_id=\"0001\" name=\"My_little_house\" number_rooms=4 number_bathrooms=2 max_guest=10 price_by_night=300 latitude=37.773972 longitude=-122.431297"))
+    self.assertIn("Object created with ID:", captured_output.getvalue())
     def help_create(self):
         """ Help information for the create method """
         print("Creates a class of any type")
