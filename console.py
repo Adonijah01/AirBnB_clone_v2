@@ -1,7 +1,5 @@
 #!/usr/bin/python3
 """ Console Module """
-
-
 import cmd
 import sys
 from models.base_model import BaseModel
@@ -12,7 +10,6 @@ from models.state import State
 from models.city import City
 from models.amenity import Amenity
 from models.review import Review
-
 
 class HBNBCommand(cmd.Cmd):
     """ Contains the functionality for the HBNB console"""
@@ -115,73 +112,38 @@ class HBNBCommand(cmd.Cmd):
         """ Overrides the emptyline method of CMD """
         pass
 
-def do_create(self, args):
-    """
-    Create a new object of a specific class with provided parameters.
-    Usage: create <Class name> <param 1> <param 2> <param 3>...
-    Parameter format: <key name>=<value>
-    Value formats:
-        - String: "<value>" (use double quotes, escape double quotes and replace underscores with spaces)
-        - Float: <unit>.<decimal>
-        - Integer: <number>
-    """
-    # Check if class name is missing
-    if not args:
-        print("** Class name is missing. **")
-        return
+    def do_create(self, args):
+     """ Create an object of any class"""
+     try:
 
-    # Split the arguments into class name and parameter pairs
-    args = args.split()
-    class_name = args[0]
-    param_pairs = args[1:]
+            if not args:
 
-    # Check if the specified class exists
-    if class_name not in HBNBCommand.classes:
-        print("** Class doesn't exist. **")
-        return
+                raise SyntaxError()
 
-    # Create a dictionary to store the parameters
-    param_dict = {}
+            arg_list = args.split(" ")
 
-    # Iterate through parameter pairs
-    for pair in param_pairs:
-        # Split the parameter pair into key and value
-        key, value = pair.split('=')
+            kw = {}
 
-        # Handle string values (remove double quotes and replace underscores)
-        if value.startswith('"') and value.endswith('"'):
-            value = value[1:-1].replace('_', ' ').replace('\\"', '"')
+            for arg in arg_list[1:]:
 
-        # Try to convert value to float or int if possible
-        try:
-            if '.' in value:
-                value = float(value)
-            else:
-                value = int(value)
-        except ValueError:
-            pass
+                arg_splited = arg.split("=")
 
-        # Add the key-value pair to the param_dict
-        param_dict[key] = value
+                arg_splited[1] = eval(arg_splited[1])
 
-    # Create an instance of the specified class with the provided parameters
-    new_instance = HBNBCommand.classes[class_name](**param_dict)
+                if type(arg_splited[1]) is str:
 
-    # Save the new instance
-    new_instance.save()
-    print("Object created with ID:", new_instance.id)
+                    arg_splited[1] = arg_splited[1].replace("_", " ").replace('"', '\\"')
 
-def test_create_with_params(self):
-    # Test creating a State object with parameters
-    self.assertFalse(self.onecmd("create State name=\"California\""))
-    self.assertIn("California", captured_output.getvalue())
+                kw[arg_splited[0]] = arg_splited[1]
 
-    self.assertFalse(self.onecmd("create State name=\"Arizona\""))
-    self.assertIn("Arizona", captured_output.getvalue())
+     except SyntaxError:
 
-    # Test creating a Place object with parameters
-    self.assertFalse(self.onecmd("create Place city_id=\"0001\" user_id=\"0001\" name=\"My_little_house\" number_rooms=4 number_bathrooms=2 max_guest=10 price_by_night=300 latitude=37.773972 longitude=-122.431297"))
-    self.assertIn("Object created with ID:", captured_output.getvalue())
+            print("** class name missing **")
+
+     except NameError:
+
+            print("** class doesn't exist **")
+
     def help_create(self):
         """ Help information for the create method """
         print("Creates a class of any type")
