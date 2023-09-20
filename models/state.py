@@ -4,7 +4,6 @@ from models.base_model import BaseModel, Base
 from sqlalchemy import Column, String
 import os
 from sqlalchemy.orm import relationship
-from models import storage
 from models.city import City
 
 storeType = os.environ.get('HBNB_TYPE_STORAGE')
@@ -24,8 +23,9 @@ class State(BaseModel, Base):
     @property
     def cities(self):
         """cities filestorage getter function"""
+        import models
         cityObjects = []
-        results = storage.all('City').values()
+        results = models.storage.all('City').values()
         for c in results:
             if c.state_id == self.id:
                 cityObjects.append(c)

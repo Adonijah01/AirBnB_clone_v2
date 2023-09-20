@@ -4,7 +4,6 @@ from models.base_model import BaseModel, Base
 from sqlalchemy import Column, String, ForeignKey, Integer, Float, Table
 import os
 from sqlalchemy.orm import relationship
-from models import storage
 
 
 storageType = os.environ.get('HBNB_TYPE_STORAGE')
@@ -89,6 +88,7 @@ class Place(BaseModel, Base):
         @property
         def reviews(self):
             """Returns review instances"""
+            from models import storage
             revwList = []
             allRevws = storage.all('Review').values()
             for rvw in allRevws:
