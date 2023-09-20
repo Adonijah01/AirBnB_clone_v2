@@ -3,7 +3,6 @@
 import cmd
 import sys
 from models.base_model import BaseModel
-from models.__init__ import storage
 from models.user import User
 from models.place import Place
 from models.state import State
@@ -24,7 +23,7 @@ class HBNBCommand(cmd.Cmd):
     }
 
     valid_keys = {
-       """ This are valid keys """
+        """ This are valid keys """
         "BaseModel": ["id", "created_at", "updated_at"],
         "User": [
             "id",
@@ -36,7 +35,8 @@ class HBNBCommand(cmd.Cmd):
         "Place": [
             "id", "created_at", "updated_at", "city_id",
             "user_id", "name", "description", "number_rooms",
-            "number_bathrooms", "max_guest", "price_by_night", "latitude", "longitude", "amenity_ids"
+            "number_bathrooms", "max_guest", "price_by_night", "latitude",
+            "longitude", "amenity_ids"
         ],
         "Amenity": ["id", "created_at", "updated_at", "name"],
         "Review": ["id", "created_at", "updated_at",
@@ -186,7 +186,6 @@ class HBNBCommand(cmd.Cmd):
             else:
                 pass
 
-
         new_instance.save()
         print(new_instance.id)
 
@@ -197,6 +196,7 @@ class HBNBCommand(cmd.Cmd):
 
     def do_show(self, args):
         """Method to show an individual object"""
+        import models
         new = args.partition(" ")
         c_name = new[0]
         c_id = new[2]
@@ -219,7 +219,7 @@ class HBNBCommand(cmd.Cmd):
 
         key = c_name + "." + c_id
         try:
-            print(storage._FileStorage__objects[key])
+            print(models.storage._FileStorage__objects[key])
         except KeyError:
             print("** no instance found **")
 
@@ -230,6 +230,7 @@ class HBNBCommand(cmd.Cmd):
 
     def do_destroy(self, args):
         """Destroys a specified object"""
+        import models
         new = args.partition(" ")
         c_name = new[0]
         c_id = new[2]
@@ -251,8 +252,8 @@ class HBNBCommand(cmd.Cmd):
         key = c_name + "." + c_id
 
         try:
-            del storage.all()[key]
-            storage.save()
+            del models.storage.all()[key]
+            models.storage.save()
         except KeyError:
             print("** no instance found **")
 
@@ -263,6 +264,7 @@ class HBNBCommand(cmd.Cmd):
 
     def do_all(self, args):
         """Shows all objects, or all objects of a class"""
+        import models
         print_list = []
 
         if args:
@@ -270,11 +272,11 @@ class HBNBCommand(cmd.Cmd):
             if args not in HBNBCommand.classes:
                 print("** class doesn't exist **")
                 return
-            for k, v in storage.all().items():
+            for k, v in models.storage.all(eval(args)).items():
                 if k.split(".")[0] == args:
                     print_list.append(str(v))
         else:
-            for k, v in storage.all().items():
+            for k, v in models.storage.all().items():
                 print_list.append(str(v))
         print(print_list)
 
@@ -285,8 +287,9 @@ class HBNBCommand(cmd.Cmd):
 
     def do_count(self, args):
         """Count current number of class instances"""
+        import models
         count = 0
-        for k, v in storage._FileStorage__objects.items():
+        for k, v in models.storage._FileStorage__objects.items():
             if args == k.split(".")[0]:
                 count += 1
         print(count)
@@ -297,6 +300,7 @@ class HBNBCommand(cmd.Cmd):
 
     def do_update(self, args):
         """Updates a certain object with new info"""
+        import models
         c_name = c_id = att_name = att_val = kwargs = ""
 
         # isolate cls from id/args, ex: (<cls>, delim, <id/args>)
@@ -322,7 +326,7 @@ class HBNBCommand(cmd.Cmd):
         key = c_name + "." + c_id
 
         # determine if key is present
-        if key not in storage.all():
+        if key not in models.storage.all():
             print("** no instance found **")
             return
 
@@ -356,7 +360,7 @@ class HBNBCommand(cmd.Cmd):
             args = [att_name, att_val]
 
         # retrieve dictionary of current objects
-        new_dict = storage.all()[key]
+        new_dict = models.storage.all()[key]
 
         # iterate through attr names and values
         for i, att_name in enumerate(args):
